@@ -7518,10 +7518,8 @@ Function UpdateEvents()
 					PositionEntity pp,976,128,-640,False
 					
 					For it.Items = Each Items
-						If (Not it\Picked)
-							If EntityDistance(it\collider,e\room\Objects[0])<0.75
-								Pick1162% = False
-							EndIf
+						If (Not it\Picked) And EntityDistance(it\collider,e\room\Objects[0])<0.75 And EntityVisible(Collider, it\collider)
+							Pick1162% = False
 						EndIf
 					Next
 					
