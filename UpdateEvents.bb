@@ -4355,8 +4355,6 @@ Function UpdateEvents()
 							EndIf
 						EndIf
 
-						DebugLog((18-Curr096\State2/70) + "  " + (22-e\EventState/70))
-						
 						If AnimTime(Curr096\obj)>25 And AnimTime(Curr096\obj)<150 Then
 							FreeSound_Strict e\Sound : e\Sound = 0
 							e\Sound=LoadSound_Strict("SFX\Character\Guard\096ServerRoom2.ogg")

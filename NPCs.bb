@@ -1300,7 +1300,8 @@ Function UpdateNPCs()
 						;[End Block]
 					Case 4
 						;[Block]
-						CanSave = False
+						; Can't save if targeting the player.
+						CanSave = n\Target<>Null
 						
 						CurrCameraZoom = CurveValue(Max(CurrCameraZoom, (Sin(Float(MilliSecs())/20.0)+1.0) * 10.0),CurrCameraZoom,8.0)
 						
@@ -1484,7 +1485,8 @@ Function UpdateNPCs()
 						
 						;[End Block]
 					Case 1,2,3
-						CanSave = False
+						; Can't save if targeting the player.
+						CanSave = n\Target<>Null
 
 						;[Block]
 						;If n\Sound = 0 Then
