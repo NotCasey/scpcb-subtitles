@@ -7,6 +7,8 @@ Const NPCtype860% = 14, NPCtype939% = 15, NPCtype066% = 16, NPCtypePdPlane% = 17
 Const NPCtype966% = 18, NPCtype1048a = 19, NPCtype1499% = 20, NPCtype008% = 21, NPCtypeClerk% = 22
 ;[End Block]
 
+Const NPCBones$ = "Data\NPCBones.ini"
+
 Type NPCs
 	Field obj%, obj2%, obj3%, obj4%, Collider%
 	Field NPCtype%, ID%
@@ -249,7 +251,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			EntityRadius n\Collider, 0.26
 			EntityType n\Collider, HIT_PLAYER
 			n\obj = LoadAnimMesh_Strict("GFX\npcs\scp096.b3d")
-			n\obj2 = CreatePivot(FindChild(n\obj, "Reyelid"))
+			n\obj2 = CreatePivot(FindChild(n\obj, GetModdedINIString(NPCBones, "SCP-096", "face_bonename")))
 			
 			n\Speed = (GetModdedINIFloat("DATA\NPCs.ini", "SCP-096", "speed") / 100.0)
 			
@@ -7253,7 +7255,7 @@ Function GetNPCManipulationValue$(NPC$,bone$,section$,valuetype%=0)
 	;2 - Float
 	;3 - Boolean
 	
-	Local value$ = GetINIString("Data\NPCBones.ini",NPC$,bone$+"_"+section$)
+	Local value$ = GetModdedINIString(NPCBones,NPC$,bone$+"_"+section$)
 	Select valuetype%
 		Case 0
 			Return value$
