@@ -2136,7 +2136,7 @@ Function FillRoom(r.Rooms)
 			;doors to observation booth
 			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z + 640.0 * RoomScale,0,r,False,False,False,"ABCD")
 			d = CreateDoor(r\zone, r\x + 928.0 * RoomScale,0,r\z - 640.0 * RoomScale,0,r,True,False,False,"ABCD")
-			d\AutoClose = False
+			d\AutoClose = False : d\MTFClose = False
 			
 			;doors to the room itself
 			d = CreateDoor(r\zone, r\x+416.0*RoomScale,0,r\z - 640.0 * RoomScale,0,r,False,False,1)
