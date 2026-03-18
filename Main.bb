@@ -10354,11 +10354,11 @@ Function Use294()
 			
 			If ytemp => 0 And ytemp < Keyboard294Height Then
 				If xtemp => 0 And xtemp < Keyboard294Width Then
-					PlaySound_Strict ButtonSFX
 
 					Local oldLayer = Keyboard294ActiveLayer
 
 					strtemp = ""
+					Local wasKeyPressed% = True
 					Local pressedKey$ = Keyboard294(Keyboard294ActiveLayer, xtemp, ytemp)
 					Select pressedKey
 						Case "SPACE"
@@ -10371,6 +10371,8 @@ Function Use294()
 							Keyboard294ActiveLayer = (Keyboard294ActiveLayer + 1) Mod Keyboard294Layers
 						Case "LAYER_DOWN"
 							Keyboard294ActiveLayer = (Keyboard294ActiveLayer - 1 + Keyboard294Layers) Mod Keyboard294Layers
+						Case "DEAD"
+							wasKeyPressed = False
 						Default
 							If Left(pressedKey, 10) = "LAYER_SET_" Then
 								Keyboard294ActiveLayer = Int(Right(pressedKey, Len(pressedKey) - 10))
@@ -10379,7 +10381,9 @@ Function Use294()
 							EndIf
 					End Select
 
-					If Keyboard294ResetLayerOnInput And oldLayer = Keyboard294ActiveLayer Then Keyboard294ActiveLayer = 0
+					If wasKeyPressed And Keyboard294ResetLayerOnInput And oldLayer = Keyboard294ActiveLayer Then Keyboard294ActiveLayer = 0
+
+					If wasKeyPressed PlaySound_Strict ButtonSFX
 				EndIf
 			EndIf
 			
