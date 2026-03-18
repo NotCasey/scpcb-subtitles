@@ -145,6 +145,12 @@ Function UpdateActiveMods()
     EndIf
     For m.Mods = Each Mods
         If m\IsActive Then
+            If locale <> "" And FileType(m\Path + LOCALIZATIONS_DIR + locale) = 2 Then
+                mm.ActiveMods = New ActiveMods
+                mm\Path = m\Path + LOCALIZATIONS_DIR + locale + "\"
+                If txt <> "" Then txt = txt + ", "
+                txt = txt + m\Id + " locale " + locale
+            EndIf
             mm.ActiveMods = New ActiveMods
             mm\Path = m\Path
             If txt <> "" Then txt = txt + ", "
