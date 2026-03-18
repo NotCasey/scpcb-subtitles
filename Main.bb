@@ -4015,11 +4015,12 @@ Function DrawEnding()
 					
 					Text x, y, I_Loc\Menu_EndEnding+" " + Upper(SelectedEnding)
 					Text x, y+20*MenuScale, I_Loc\Menu_EndTime+" " + FormatDuration(PlayTime, SpeedRunMode)
-					Text x, y+40*MenuScale, I_Loc\Menu_EndScps+" " + scpsEncountered
-					Text x, y+60*MenuScale, I_Loc\Menu_EndAchv+" " + achievementsUnlocked+"/"+(MAXACHIEVEMENTS)
-					Text x, y+80*MenuScale, I_Loc\Menu_EndRooms+" " + roomsfound+"/"+roomamount
-					Text x, y+100*MenuScale, I_Loc\Menu_EndDocs+" " +docsfound+"/"+docamount
-					Text x, y+120*MenuScale, I_Loc\Menu_End914+" " +RefinedItems			
+					Text x, y+40*MenuScale, GetSeedString()
+					Text x, y+60*MenuScale, I_Loc\Menu_EndScps+" " + scpsEncountered
+					Text x, y+80*MenuScale, I_Loc\Menu_EndAchv+" " + achievementsUnlocked+"/"+(MAXACHIEVEMENTS)
+					Text x, y+100*MenuScale, I_Loc\Menu_EndRooms+" " + roomsfound+"/"+roomamount
+					Text x, y+120*MenuScale, I_Loc\Menu_EndDocs+" " +docsfound+"/"+docamount
+					Text x, y+140*MenuScale, I_Loc\Menu_End914+" " +RefinedItems			
 					
 					x = GraphicWidth / 2 - width / 2
 					y = GraphicHeight / 2 - height / 2
