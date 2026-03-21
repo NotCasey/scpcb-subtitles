@@ -10086,7 +10086,7 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 				Case "1:1"
 					it2 = CreateItem("cigarette", x, y, z)
 				Case "fine"
-					it2 = CreateItem("join", x, y, z)
+					it2 = CreateItem("joint", x, y, z)
 				Case "very fine"
 					it2 = CreateItem("smellyjoint", x, y, z)
 			End Select
