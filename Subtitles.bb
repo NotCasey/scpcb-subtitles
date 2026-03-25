@@ -192,9 +192,7 @@ End Function
 Function CreateSubtitleEntry.SubtitleEntry(key$, value$, isCaption%=False)
 	Local e.SubtitleEntry = new SubtitleEntry
 
-	If key<>"text" Then
-		e\time = Float(key)
-	EndIf
+	e\time = Float(key)
 	e\length = (5.0+1.0) * 70.0
 
 	e\col = FindSubtitleVoice("default")
