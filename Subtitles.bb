@@ -109,7 +109,6 @@ Function LoadSubtitleVoices(path$)
 	Local f% = OpenFile(path)
 
 	local section$ = ""
-	Local name$ = ""
 	Local v.SubtitleColor
 	While Not Eof(f)
 		Local linestr$ = ReadLine(f)
@@ -150,8 +149,9 @@ Function LoadSubtitleTokens(path$, closedCaptions%=False)
 	Local f% = OpenFile(path)
 
 	Local section$ = ""
-	Local offset% = 1
-	Local toChar% = 0
+	Local used% = True
+	Local c.SubtitleColor = Null ; Token color settings
+
 	Local firstEntry.SubtitleEntry
 	Local lastEntry.SubtitleEntry
 	While Not Eof(f)
@@ -169,14 +169,23 @@ Function LoadSubtitleTokens(path$, closedCaptions%=False)
 
 			section = Lower(Mid(strtemp, 2, Len(strtemp)-2))
 
+			If Not used Then Delete c
+
+			used = False
+			c = new SubtitleColor
+			CopySubtitleColor(FindOrAddSubtitleVoice("default"), c)
+
 		ElseIf section<>"" And equal<>0 Then
 			Local key$ = Trim(Left(strtemp, equal-1))
 			Local value$ = Trim(Right(strtemp, Len(strtemp)-equal))
 
-			Local e.SubtitleEntry = CreateSubtitleEntry(key, value, closedCaptions)
-			If firstEntry = Null Then firstEntry = e
-			If lastEntry <> Null Then lastEntry\nextEntry = e
-			lastEntry = e
+			If Not ApplySubtitleColorSetting(key, value, c) Then
+				Local e.SubtitleEntry = CreateSubtitleEntry(key, value, c, closedCaptions)
+				If e\col = c Then used = True ; If the same color gets returned, this color is now being referenced directly by an entry and should not be deleted.
+				If firstEntry = Null Then firstEntry = e
+				If lastEntry <> Null Then lastEntry\nextEntry = e
+				lastEntry = e
+			EndIf
 		EndIf
 	Wend
 
@@ -190,13 +199,13 @@ Function LoadSubtitleTokens(path$, closedCaptions%=False)
 End Function
 
 
-Function CreateSubtitleEntry.SubtitleEntry(key$, value$, isCaption%=False)
+Function CreateSubtitleEntry.SubtitleEntry(key$, value$, clr.SubtitleColor, isCaption%=False)
 	Local e.SubtitleEntry = new SubtitleEntry
 
 	e\time = Float(key)
 	e\length = (5.0+1.0) * 70.0
 
-	e\col = FindSubtitleVoice("default")
+	e\col = clr
 	e\txt = ParseSubtitleSettings(e, value, isCaption)
 
 	e\isCaption = e\isCaption Or isCaption
@@ -271,7 +280,7 @@ Function ParseSubtitleSettings$(e.SubtitleEntry, txt$, isCaption%=False)
 	EndIf
 
 	Local c.SubtitleColor = new SubtitleColor
-	CopySubtitleColor(FindSubtitleVoice("default"), c, True)
+	CopySubtitleColor(e\col, c, True)
 
 	Local parsingKey% = True 
 	Local key$ = ""
@@ -315,13 +324,14 @@ Function ParseSubtitleSettings$(e.SubtitleEntry, txt$, isCaption%=False)
 		EndIf
 	Next
 
-	Delete c
+	e\col = InternSubtitleColor(c)
 	Return txt
 End Function
 
-Function ApplySubtitleDataSetting(key$, value$, e.SubtitleEntry)
+Function ApplySubtitleDataSetting%(key$, value$, e.SubtitleEntry)
 	If key = "length" Then
-		e\length = (Float(value)+1.0 * 70.0)
+		e\length = (Float(value)+1.0) * 70.0
+		Return True
 	EndIf
 
 	If key = "caption" Then
@@ -330,23 +340,28 @@ Function ApplySubtitleDataSetting(key$, value$, e.SubtitleEntry)
 		ElseIf value = "false" Then
 			e\isCaption = False
 		EndIf
+		Return True
 	EndIf
+
+	Return False
 End Function
 
-Function ApplySubtitleColorSetting(key$, value$, c.SubtitleColor)
+Function ApplySubtitleColorSetting%(key$, value$, c.SubtitleColor)
 	If key = "voice" Then
 		For clr.SubtitleColor = Each SubtitleColor
 			If clr\voiceKey = value And clr <> c Then
-				CopySubtitleColor(clr, c)
+				CopySubtitleColor(clr, c, False, False)
 			EndIf
 		Next
+
+		Return True
 	EndIf
 
-	If key = "name" Then c\name = value
+	If key = "name" Then c\name = value : Return True
 
-	If key = "r" Then c\r = Int(value)
-	If key = "g" Then c\g = Int(value)
-	If key = "b" Then c\b = Int(value)
+	If key = "r" Then c\r = Int(value) : Return True
+	If key = "g" Then c\g = Int(value) : Return True
+	If key = "b" Then c\b = Int(value) : Return True
 	
 	If key = "bold" Then
 		If value = "true" Then
@@ -354,6 +369,8 @@ Function ApplySubtitleColorSetting(key$, value$, c.SubtitleColor)
 		ElseIf value = "false" Then
 			c\isBold = False
 		EndIf
+
+		Return True
 	EndIf
 	If key = "italic" Then
 		If value = "true" Then
@@ -361,14 +378,18 @@ Function ApplySubtitleColorSetting(key$, value$, c.SubtitleColor)
 		ElseIf value = "false" Then
 			c\isItalic = False
 		EndIf
+
+		Return True
 	EndIf
 
-	If key = "minvolume" Then c\minVolume = Float(value)
-	If key = "cooldown" Then c\cooldownLength = Float(value)
+	If key = "minvolume" Then c\minVolume = Float(value) : Return True
+	If key = "cooldown" Then c\cooldownLength = Float(value) : Return True
+
+	Return False
 End Function
 
 
-Function FindSubtitleVoice.SubtitleColor(voice$)
+Function FindOrAddSubtitleVoice.SubtitleColor(voice$)
 	For clr.SubtitleColor = Each SubtitleColor
 		If clr\voiceKey = voice Then
 			Return clr
@@ -383,14 +404,14 @@ Function FindSubtitleVoice.SubtitleColor(voice$)
 	Return c
 End Function
 
-Function CopySubtitleColor(fromColor.SubtitleColor, toColor.SubtitleColor, keepVoiceKey%=False)
+Function CopySubtitleColor(fromColor.SubtitleColor, toColor.SubtitleColor, keepVoiceKey%=False, keepBools%=True)
 	If keepVoiceKey Then toColor\voiceKey = fromColor\voiceKey
 	toColor\name = fromColor\name
 	toColor\r = fromColor\r
 	toColor\g = fromColor\g
 	toColor\b = fromColor\b
-	toColor\isItalic = fromColor\isItalic
-	toColor\isBold = fromColor\isBold
+	If keepBools Or fromColor\isItalic Then toColor\isItalic = fromColor\isItalic
+	If keepBools Or fromColor\isBold Then toColor\isBold = fromColor\isBold
 	toColor\minVolume = fromColor\minVolume
 	toColor\cooldownLength = fromColor\cooldownLength
 End Function
@@ -409,6 +430,10 @@ Function SubtitleColorsMatch%(firstColor.SubtitleColor, secondColor.SubtitleColo
 End Function
 
 Function InternSubtitleColor.SubtitleColor(c.SubtitleColor)
+	If c = Null Then
+		Return Null
+	EndIf
+
 	For clr.SubtitleColor = Each SubtitleColor
 		If c <> clr And SubtitleColorsMatch(c, clr) Then
 			Delete c
@@ -417,6 +442,27 @@ Function InternSubtitleColor.SubtitleColor(c.SubtitleColor)
 	Next
 
 	Return c
+End Function
+
+Function CleanupColors()
+	Local c% = 0
+
+	For clr.SubtitleColor = Each SubtitleColor
+		Local referenced% = False
+		For e.SubtitleEntry = Each SubtitleEntry
+			If e\col = clr Then
+				referenced = True
+				Exit
+			EndIf
+		Next
+
+		If Not referenced Then
+			Delete clr
+			c = c + 1
+		EndIf
+	Next
+
+	DebugLog("Cleaned up "+Str(c)+" unused colors.")
 End Function
 
 
@@ -431,6 +477,7 @@ Function LoadSubtitles()
 	Delete Each SubtitleColor
 	Dim SubtitleCacheKey$(SubtitleCacheSize)
 	Dim SubtitleCacheToken%(SubtitleCacheSize)
+	SubtitleCacheNext = 0
 
 	DebugLog "Loading Subtitles"
 
@@ -449,17 +496,21 @@ Function LoadSubtitles()
 	For m.ActiveMods = Each ActiveMods
 		If subtitlesUnlocked And FileType(m\Path + SubtitleFilePath) = 1 Then
 			LoadSubtitleTokens(m\Path + SubtitleFilePath)
-			If FileType(m\Path + SubtitleFilePath + ".OVERRIDE") = 1 Then subtitlesUnlocked = False : Exit
+			If FileType(m\Path + SubtitleFilePath + ".OVERRIDE") = 1 Then subtitlesUnlocked = False
 		EndIf
 
 		If captionsUnlocked And FileType(m\Path + ClosedCaptionFilePath) = 1 Then
 			LoadSubtitleTokens(m\Path + ClosedCaptionFilePath, True)
-			If FileType(m\Path + ClosedCaptionFilePath + ".OVERRIDE") = 1 Then captionsUnlocked = False : Exit
+			If FileType(m\Path + ClosedCaptionFilePath + ".OVERRIDE") = 1 Then captionsUnlocked = False
 		EndIf
+
+		If (Not subtitlesUnlocked) And (Not captionsUnlocked) Then Exit
 	Next
 
 	If subtitlesUnlocked Then LoadSubtitleTokens(SubtitleFilePath)
 	If captionsUnlocked Then LoadSubtitleTokens(ClosedCaptionFilePath, True)
+
+	CleanupColors()
 
 	Local tokenCount% = 0
 	Local entryCount% = 0
