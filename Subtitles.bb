@@ -620,8 +620,9 @@ Function PauseQueuedSubtitle(soundChannel%, paused%)
 	Next
 End Function
 
-Function ClearQueuedSubtitles()
+Function ClearSubtitles()
 	Delete Each QueuedSubtitleMsg
+	Delete Each SubtitleMsg
 End Function
 
 

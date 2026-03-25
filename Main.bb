@@ -9546,7 +9546,7 @@ Function KillSounds()
 		Next
 	Next
 
-	ClearQueuedSubtitles()
+	ClearSubtitles()
 	
 	DebugLog "Terminated all sounds"
 	
