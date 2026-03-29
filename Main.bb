@@ -126,7 +126,6 @@ Global MenuWhite%, MenuBlack%
 Global ButtonSFX% = LoadSound_Strict("SFX\Interact\Button.ogg")
 
 Global EnableSFXRelease% = GetOptionInt("audio", "sfx release")
-Global EnableSFXRelease_Prev% = EnableSFXRelease%
 
 Global SubtitlesEnabled% = GetOptionInt("audio", "subtitles")
 Global ClosedCaptionsEnabled% = GetOptionInt("audio", "closed captions")
@@ -7616,16 +7615,27 @@ Function DrawMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"soundvol",PrevSFXVolume)
 					EndIf
 					
-					y = y + 30*MenuScale
+					y = y + 50*MenuScale
 					
-					Color 100,100,100
-					Text x, y, I_Loc\OptionName_Sfxautorelease
-					EnableSFXRelease = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableSFXRelease,True)
+					Text x, y, I_Loc\OptionName_Subtitles
+					SubtitlesEnabled = DrawTick(x + 270 * MenuScale, y + MenuScale, SubtitlesEnabled)
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"sfxautorelease")
+						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"subtitles")
 					EndIf
-					
+
+					If (Not SubtitlesEnabled) Then ClosedCaptionsEnabled = False
+
 					y = y + 30*MenuScale
+					
+					Text x, y, I_Loc\OptionName_Closedcaptions
+					ClosedCaptionsEnabled = DrawTick(x + 270 * MenuScale, y + MenuScale, ClosedCaptionsEnabled)
+					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"closedcaptions")
+					EndIf
+
+					If ClosedCaptionsEnabled Then SubtitlesEnabled = True
+					
+					y = y + 50*MenuScale
 					
 					Color 100,100,100
 					Text x, y, I_Loc\OptionName_Usertrack
