@@ -905,6 +905,7 @@ Function DrawSubtitles()
 End Function
 
 Function RenderSubtitles()
+	If Not SubtitlesEnabled Then Return
 	CatchErrors("Uncaught (RenderSubtitles)")
 
 	EntityAlpha(SubBox\sprite, 0.7*SubBox\alpha)

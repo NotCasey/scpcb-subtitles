@@ -3432,7 +3432,8 @@ While IsRunning
 			Local messageOpacity% = Min(MsgTimer / 2, 255)
 			If (Not temp%)
 				; Push text up if subtitles box has lots of text.
-				Local h# = Min((GraphicHeight / 2) + 200, SubBox\curTop-SubtitleTextHeight*2)
+				Local h# = (GraphicHeight / 2) + 200
+				If SubtitlesEnabled Then h = Min(h, SubBox\curTop-SubtitleTextHeight*2)
 				Color 0,0,0
 				Text((GraphicWidth / 2)+1, h+1, Msg, True, False)
 				Color messageOpacity, messageOpacity, messageOpacity
@@ -7618,12 +7619,16 @@ Function DrawMenu()
 					y = y + 50*MenuScale
 					
 					Text x, y, I_Loc\OptionName_Subtitles
+					Local subtitlesWereEnabled = SubtitlesEnabled
 					SubtitlesEnabled = DrawTick(x + 270 * MenuScale, y + MenuScale, SubtitlesEnabled)
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"subtitles")
 					EndIf
-
-					If (Not SubtitlesEnabled) Then ClosedCaptionsEnabled = False
+					
+					If (Not SubtitlesEnabled) Then
+						ClosedCaptionsEnabled = False
+						If subtitlesWereEnabled Then ClearSubtitles() : RecalculateSubtitleBoxTarget()
+					EndIf
 
 					y = y + 30*MenuScale
 					
